@@ -63,9 +63,11 @@ class _BuscaCidadePageState extends State<BuscaCidadePage> {
       Map<String, dynamic>? resultadoGif;
       try {
         resultadoGif = await _giphyService.getGif(
-          '${resultado.municipio} ${resultado.uf} city Brazil',
+          '${resultado.municipio}',
         );
-      } catch (_) {}
+      } catch (_) {
+        // Se a busca do GIF falhar, apenas ignore e continue sem o GIF.
+      }
 
       if (!mounted) return;
       setState(() {

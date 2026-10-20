@@ -22,6 +22,7 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
   Map<String, dynamic>? _gif;
   bool _carregando = false;
   String? _erro;
+  String? _erroGif;
 
   @override
   void dispose() {
@@ -51,9 +52,11 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
     if (!_formKey.currentState!.validate()) return;
 
     FocusScope.of(context).unfocus();
+
     setState(() {
       _carregando = true;
       _erro = null;
+      _erroGif = null;
       _veiculo = null;
       _gif = null;
     });
@@ -64,20 +67,27 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
       );
 
       Map<String, dynamic>? resultadoGif;
+      String? erroGif;
+
       try {
         resultadoGif = await _giphyService.getGif(
-          '${resultado.marca} ${resultado.modelo} vehicle',
+          '${resultado.tipoVeiculo} ${resultado.marca}'
         );
-      } catch (_) {}
+      } catch (e) {
+        erroGif = e.toString().replaceFirst('Exception: ', '');
+      }
 
       if (!mounted) return;
+
       setState(() {
         _veiculo = resultado;
         _gif = resultadoGif;
+        _erroGif = erroGif;
         _carregando = false;
       });
     } catch (e) {
       if (!mounted) return;
+
       setState(() {
         _erro = e.toString().replaceFirst('Exception: ', '');
         _carregando = false;
@@ -126,7 +136,9 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _carregando ? null : _buscar,
-                child: Text(_carregando ? 'Buscando...' : 'Buscar informações'),
+                child: Text(
+                  _carregando ? 'Buscando...' : 'Buscar informações',
+                ),
               ),
             ),
             if (_carregando)
@@ -172,9 +184,20 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
   }
 
   Widget _exibeGif() {
+    if (_erroGif != null) {
+      return Card(
+        child: ListTile(
+          title: const Text('Falha ao buscar animação'),
+          subtitle: Text(_erroGif!),
+        ),
+      );
+    }
+
     if (_gif == null) {
       return const Card(
-        child: ListTile(title: Text('Nenhuma animação encontrada.')),
+        child: ListTile(
+          title: Text('Nenhuma animação encontrada para este veículo.'),
+        ),
       );
     }
 
@@ -183,7 +206,11 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
     final url = fixa?['url'] as String?;
 
     if (url == null || url.isEmpty) {
-      return const SizedBox.shrink();
+      return const Card(
+        child: ListTile(
+          title: Text('O resultado não contém uma imagem disponível.'),
+        ),
+      );
     }
 
     return Card(
@@ -200,6 +227,12 @@ class _BuscaInformacoesPageState extends State<BuscaInformacoesPage> {
           height: 190,
           width: double.infinity,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Não foi possível carregar a animação.'),
+            );
+          },
         ),
       ),
     );

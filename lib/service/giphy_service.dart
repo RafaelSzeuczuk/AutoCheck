@@ -12,7 +12,7 @@ class GiphyService {
       'q': search,
       'limit': '1',
       'rating': 'g',
-      'lang': 'en',
+      'lang': 'pt',
     });
     final response = await http.get(uri).timeout(const Duration(seconds: 20));
     if (response.statusCode < 200 || response.statusCode >= 300) {

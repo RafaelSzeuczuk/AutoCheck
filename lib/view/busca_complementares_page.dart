@@ -13,8 +13,7 @@ class BuscaComplementaresPage extends StatefulWidget {
       _BuscaComplementaresPageState();
 }
 
-class _BuscaComplementaresPageState
-    extends State<BuscaComplementaresPage> {
+class _BuscaComplementaresPageState extends State<BuscaComplementaresPage> {
   final _formKey = GlobalKey<FormState>();
   final _controller = TextEditingController();
   final _apiService = VehicleService();
@@ -65,11 +64,11 @@ class _BuscaComplementaresPageState
       Map<String, dynamic>? resultadoGif;
       try {
         resultadoGif = await _giphyService.getGif(
-          '${resultado.marca} ${resultado.modelo} vehicle',
+          '${resultado.tipoVeiculo} ${resultado.marca}'
         );
       } catch (_) {}
 
-      if (!mounted) return;
+      if (!mounted) return;//checa se o widget ainda está na árvore de widgets antes de chamar setState
       setState(() {
         _veiculo = resultado;
         _gif = resultadoGif;
@@ -175,14 +174,9 @@ class _BuscaComplementaresPageState
               children: [
                 const Text(
                   'Informações complementares',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
                 ),
-                ...dados.entries.map(
-                  (item) => _linha(item.key, item.value),
-                ),
+                ...dados.entries.map((item) => _linha(item.key, item.value)),
               ],
             ),
           ),
@@ -232,10 +226,7 @@ class _BuscaComplementaresPageState
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            flex: 3,
-            child: Text(valor),
-          ),
+          Expanded(flex: 3, child: Text(valor)),
         ],
       ),
     );
